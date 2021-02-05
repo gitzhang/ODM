@@ -40,7 +40,7 @@ class ODM_Reconstruction(object):
             if not p.band_name in band_photos:
                 band_photos[p.band_name] = []
             if not p.band_name in band_indexes:
-                band_indexes[p.band_name] = p.band_index
+                band_indexes[p.band_name] = str(p.band_index)
 
             band_photos[p.band_name].append(p)
             
@@ -243,7 +243,6 @@ class ODM_Tree(object):
         self.opensfm_image_list = os.path.join(self.opensfm, 'image_list.txt')
         self.opensfm_reconstruction = os.path.join(self.opensfm, 'reconstruction.json')
         self.opensfm_reconstruction_nvm = os.path.join(self.opensfm, 'undistorted/reconstruction.nvm')
-        self.opensfm_model = os.path.join(self.opensfm, 'undistorted/depthmaps/merged.ply')
         self.opensfm_transformation = os.path.join(self.opensfm, 'geocoords_transformation.txt')
 
         # OpenMVS

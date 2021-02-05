@@ -8,6 +8,7 @@ from opendm import point_cloud
 from opendm import types
 from opendm.utils import get_depthmap_resolution
 from opendm.osfm import OSFMContext
+from opendm.multispectral import get_primary_band_name
 
 class ODMOpenMVSStage(types.ODM_Stage):
     def process(self, args, outputs):
@@ -28,11 +29,6 @@ class ODMOpenMVSStage(types.ODM_Stage):
             # export reconstruction from opensfm
             octx = OSFMContext(tree.opensfm)
             cmd = 'export_openmvs'
-            if reconstruction.multi_camera:
-                # Export only the primary band
-                primary = reconstruction.multi_camera[0]
-                image_list = os.path.join(tree.opensfm, "image_list_%s.txt" % primary['name'].lower())
-                cmd += ' --image_list "%s"' % image_list
             octx.run(cmd)
             
             self.update_progress(10)
@@ -42,22 +38,24 @@ class ODMOpenMVSStage(types.ODM_Stage):
                 os.mkdir(depthmaps_dir)
             
             depthmap_resolution = get_depthmap_resolution(args, photos)
-
             if outputs["undist_image_max_size"] <= depthmap_resolution:
                 resolution_level = 0
             else:
-                resolution_level = math.floor(math.log(outputs['undist_image_max_size'] / float(depthmap_resolution)) / math.log(2))
+                resolution_level = int(round(math.log(outputs['undist_image_max_size'] / float(depthmap_resolution)) / math.log(2)))
 
             config = [
                 " --resolution-level %s" % int(resolution_level),
 	            "--min-resolution %s" % depthmap_resolution,
                 "--max-resolution %s" % int(outputs['undist_image_max_size']),
                 "--max-threads %s" % args.max_concurrency,
+                "--number-views-fuse 2",
                 '-w "%s"' % depthmaps_dir, 
                 "-v 0",
             ]
 
             log.ODM_INFO("Running dense reconstruction. This might take a while.")
+            
+            # TODO: add support for image masks
             
             system.run('%s "%s" %s' % (context.omvs_densify_path, 
                                        os.path.join(tree.openmvs, 'scene.mvs'),

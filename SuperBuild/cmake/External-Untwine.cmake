@@ -1,29 +1,27 @@
-set(_proj_name opensfm)
+set(_proj_name untwine)
 set(_SB_BINARY_DIR "${SB_BINARY_DIR}/${_proj_name}")
 
 ExternalProject_Add(${_proj_name}
-  DEPENDS           ceres opencv gflags
+  DEPENDS           pdal
   PREFIX            ${_SB_BINARY_DIR}
   TMP_DIR           ${_SB_BINARY_DIR}/tmp
   STAMP_DIR         ${_SB_BINARY_DIR}/stamp
   #--Download step--------------
   DOWNLOAD_DIR      ${SB_DOWNLOAD_DIR}
-  GIT_REPOSITORY    https://github.com/OpenDroneMap/OpenSfM/
-  GIT_TAG           241
+  GIT_REPOSITORY    https://github.com/pierotofy/untwine/
+  GIT_TAG           insttgt
   #--Update/Patch step----------
-  UPDATE_COMMAND    git submodule update --init --recursive
+  UPDATE_COMMAND    ""
   #--Configure step-------------
   SOURCE_DIR        ${SB_SOURCE_DIR}/${_proj_name}
-  CONFIGURE_COMMAND cmake <SOURCE_DIR>/${_proj_name}/src
-    -DCERES_ROOT_DIR=${SB_INSTALL_DIR}
-    -DOpenCV_DIR=${SB_INSTALL_DIR}/lib/cmake/opencv4
-    -DADDITIONAL_INCLUDE_DIRS=${SB_INSTALL_DIR}/include
-    -DOPENSFM_BUILD_TESTS=off
-    -DPYTHON_EXECUTABLE=/usr/bin/python3
+  CMAKE_ARGS
+    -DPDAL_DIR=${SB_INSTALL_DIR}/lib/cmake/PDAL
+	-DCMAKE_BUILD_TYPE=Release
+    -DCMAKE_INSTALL_PREFIX:PATH=${SB_INSTALL_DIR}
   #--Build step-----------------
   BINARY_DIR        ${_SB_BINARY_DIR}
   #--Install step---------------
-  INSTALL_COMMAND    ""
+  INSTALL_DIR       ${SB_INSTALL_DIR}
   #--Output logging-------------
   LOG_DOWNLOAD      OFF
   LOG_CONFIGURE     OFF
